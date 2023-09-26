@@ -7,12 +7,9 @@
 
 #include "dhcp-stats.h"
 
-
 int main(int argc, char *argv[])
 {
     Arguments arguments;
     arguments.check(argc, argv);
-    // struct Arguments *arguments;
-    // allocate_resources(&arguments);
-    // free_resources(arguments);
+    // printf("\n\n%s\n\n", arguments.interface.c_str());
 }
