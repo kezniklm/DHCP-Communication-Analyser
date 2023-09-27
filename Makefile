@@ -19,9 +19,8 @@ error.o: error.hpp error.cpp
 Arguments.o: Arguments.hpp Arguments.cpp
 	$(CC) $(CFLAGS) -c Arguments.cpp -o Arguments.o
 
-IP_prefix.o: IP_prefix.cpp IP_prefix.hpp
+IP_prefix.o: IP_prefix.hpp IP_prefix.cpp 
 	$(CC) $(CFLAGS) -c IP_prefix.cpp -o IP_prefix.o
-
 
 dhcp-stats.o: dhcp-stats.hpp dhcp-stats.cpp
 	$(CC) $(CFLAGS) -c dhcp-stats.cpp -o dhcp-stats.o
