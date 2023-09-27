@@ -8,3 +8,5 @@
 #pragma once
 
 #include "Arguments.hpp"
+
+#define ERROR -1
