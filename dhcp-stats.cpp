@@ -1,11 +1,11 @@
 /**
- * @file dhcp-stats.c
+ * @file dhcp-stats.cpp
  * @author Matej Keznikl (xkezni01@stud.fit.vutbr.cz)
- * @brief Implementácia sieťového sniffera
+ * @brief Implementácia analyzátora percentuálneho využitia sieťových prefixov dhcp-stats
  * @date 2023-11-20
  */
 
-#include "dhcp-stats.h"
+#include "dhcp-stats.hpp"
 
 int main(int argc, char *argv[])
 {

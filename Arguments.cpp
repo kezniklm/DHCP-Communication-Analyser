@@ -1,16 +1,24 @@
 /**
- * @file args.h
+ * @file Arguments.cpp
  * @author Matej Keznikl (xkezni01@stud.fit.vutbr.cz)
  * @brief Implementácia spracovania argumentov programu dhcp-stats
  * @date 2023-11-20
  */
 
-#include "args.h"
+#include "Arguments.hpp"
 
+/**
+ * @brief Konštruktor triedy Arguments - inicializuje inštančné premenné
+ */
 Arguments::Arguments() : is_interface(false), is_filename(false), file(nullptr)
 {
 }
 
+/**
+ * @brief Skontroluje a spracuje argumenty zadané na príkazový riadok
+ * @param argc Počet argumentov programu
+ * @param argv Argumenty programu
+ */
 void Arguments::check(int argc, char *argv[])
 {
     if (!argv)
@@ -44,7 +52,7 @@ void Arguments::check(int argc, char *argv[])
             printf("Názov:\n    dhcp-stats - analyzátor percentuálneho využitia sieťových prefixov\n\nPoužitie:\n  ./dhcp-stats [-r <filename>] [-i <interface-name>] <ip-prefix> [ <ip-prefix> [ ... ] ]\n\n  ./dhcp-stats --help \n\n  ./dhcp-stats -h \nPopis:\n    Sieťový analyzátor, ktorý umožňuje získanie percentuálneho využitia sieťových prefixov\n");
             std::exit(EXIT_SUCCESS);
         }
-        else if (this->is_correct_prefix((std::string)argv[argument_number]) && this->check_overlap((std::string)argv[argument_number]))
+        else if (this->is_correct_prefix((std::string)argv[argument_number]))
         {
             if (this->is_prefix_in_vector((std::string)argv[argument_number]))
             {
@@ -84,8 +92,14 @@ void Arguments::is_another_argument(char *argv[], int argument_number)
     }
 }
 
+/**
+ * @brief Skontroluje korektnosť prefixu
+ * @param prefix Prefix, ktorý sa má skontrolovať
+ * @return
+ */
 bool Arguments::is_correct_prefix(std::string prefix)
 {
+    this->check_overlap(prefix);
     std::istringstream iss(prefix);
     std::string address;
     std::string mask;
@@ -102,7 +116,11 @@ bool Arguments::is_correct_prefix(std::string prefix)
     return true;
 }
 
-bool Arguments::check_overlap(std::string prefix)
+/**
+ * @brief Skontroluje, či sa jedná o adresu siete a nie rozhrania
+ * @param prefix Prefix, ktorý sa má skontrolovať
+ */
+void Arguments::check_overlap(std::string prefix)
 {
     std::string address = prefix.substr(0, prefix.find('/'));
     int network_bits = 0;
@@ -120,7 +138,7 @@ bool Arguments::check_overlap(std::string prefix)
     }
     std::istringstream iss(address);
     std::string octet;
-    int octet_number = 0;
+
     while (std::getline(iss, octet, '.'))
     {
         int number = std::stoi(octet);
@@ -129,14 +147,12 @@ bool Arguments::check_overlap(std::string prefix)
         std::bitset<8> binary_representation(number);
         for (int i = binary_representation.size() - 1; i >= 0; --i)
         {
-            bool bit_value = binary_representation[i];
-            if(network_bits-- <= 0 && binary_representation[i] != false)
+            if (network_bits-- <= 0 && binary_representation[i] != false)
             {
                 error_exit("Prefix nie je správny - jedná sa o IP adresu rozhrania a nie siete\n");
             }
         }
     }
-    return true;
 }
 
 /**
@@ -180,6 +196,10 @@ void Arguments::check_scope(std::string octet, int *octet_number)
     (*octet_number)++;
 }
 
+/**
+ * @brief Skontroluje počet bitov masky tak, aby bol v intervale <0,32>
+ * @param mask Maska na skontrolovanie
+ */
 void Arguments::check_mask(std::string mask)
 {
     if (mask.empty())
@@ -193,6 +213,13 @@ void Arguments::check_mask(std::string mask)
     }
 }
 
+/**
+ * @brief Kontroluje, či je číslo v zadanom intervale
+ * @param to_check Číslo na skontrolovanie
+ * @param start Začiatok intervalu
+ * @param end Koniec intervalu
+ * @return
+ */
 bool Arguments::is_in_interval(std::string to_check, int start, int end)
 {
     try
@@ -215,6 +242,11 @@ bool Arguments::is_in_interval(std::string to_check, int start, int end)
     return true;
 }
 
+/**
+ * @brief Skontroluje, či zadaný prefix sa už nachádza vo vektore IP_prefixes
+ * @param target Prefix, ktorý má byť skontrolovaný
+ * @return
+ */
 bool Arguments::is_prefix_in_vector(const IP_prefix &target)
 {
     for (const IP_prefix &prefix_interator : this->IP_prefixes)
@@ -225,34 +257,4 @@ bool Arguments::is_prefix_in_vector(const IP_prefix &target)
         }
     }
     return false;
-}
-
-IP_prefix::IP_prefix(std::string prefix)
-{
-    this->prefix = prefix;
-    this->used = 0;
-    this->usage = 0.0;
-    this->maximum = this->calculate_maximum_usage(prefix);
-}
-
-int IP_prefix::calculate_maximum_usage(std::string prefix)
-{
-    std::string ipAddress = prefix.substr(0, prefix.find('/'));
-    int prefixLength;
-    std::istringstream(prefix.substr(prefix.find('/') + 1)) >> prefixLength;
-
-    // Prevod IPv4 adresy na jej binárnu reprezentáciu
-    std::string binaryIpAddress = "";
-    std::string octet;
-    std::istringstream octetStream(ipAddress);
-    while (std::getline(octetStream, octet, '.'))
-    {
-        int value = std::stoi(octet);
-        binaryIpAddress += std::bitset<8>(value).to_string();
-    }
-
-    // Výpočet dostupných adries
-    int availableAddresses = 1 << (32 - prefixLength);
-
-    return (availableAddresses - NETWORK_ADRESS - BROADCAST_ADRESS);
 }

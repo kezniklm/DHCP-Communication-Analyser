@@ -8,18 +8,22 @@
 CC = g++
 CFLAGS = -std=c++20 -pedantic -Wextra -Werror -g -fcommon -D_DEFAULT_SOURCE -lpcap 
 
-.PHONY: error.o args.o dhcp-stats.o dhcp-stats zip clean
+.PHONY: error.o Arguments.o dhcp-stats.o dhcp-stats zip clean
 
-dhcp-stats: error.o args.o dhcp-stats.o
-	$(CC) $(CFLAGS) error.o args.o dhcp-stats.o -o dhcp-stats -lpcap 
+dhcp-stats: error.o IP_prefix.o Arguments.o dhcp-stats.o
+	$(CC) $(CFLAGS) error.o IP_prefix.o Arguments.o dhcp-stats.o -o dhcp-stats -lpcap 
 
-error.o: error.h error.cpp 
+error.o: error.hpp error.cpp 
 	$(CC) $(CFLAGS) -c error.cpp -o error.o
 
-args.o: args.h args.cpp
-	$(CC) $(CFLAGS) -c args.cpp -o args.o
+Arguments.o: Arguments.hpp Arguments.cpp
+	$(CC) $(CFLAGS) -c Arguments.cpp -o Arguments.o
 
-dhcp-stats.o: dhcp-stats.h dhcp-stats.cpp
+IP_prefix.o: IP_prefix.cpp IP_prefix.hpp
+	$(CC) $(CFLAGS) -c IP_prefix.cpp -o IP_prefix.o
+
+
+dhcp-stats.o: dhcp-stats.hpp dhcp-stats.cpp
 	$(CC) $(CFLAGS) -c dhcp-stats.cpp -o dhcp-stats.o
 
 zip:
