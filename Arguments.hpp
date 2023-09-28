@@ -38,6 +38,7 @@ public:
     bool is_interface;
     std::string interface;
     bool is_filename;
+    bool extensions;
     pcap_t *file;
     std::vector<IP_prefix> IP_prefixes;
 

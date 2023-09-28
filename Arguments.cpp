@@ -47,6 +47,10 @@ void Arguments::check(int argc, char *argv[])
             this->interface = (std::string)argv[argument_number + NEXT_ARGUMENT];
             argument_number++;
         }
+        else if(!std::strcmp(argv[argument_number], "--ext"))
+        {
+            this->extensions = true;
+        }
         else if (!std::strcmp(argv[argument_number], "--help") || !std::strcmp(argv[argument_number], "-h"))
         {
             printf("Názov:\n    dhcp-stats - analyzátor percentuálneho využitia sieťových prefixov\n\nPoužitie:\n  ./dhcp-stats [-r <filename>] [-i <interface-name>] <ip-prefix> [ <ip-prefix> [ ... ] ]\n\n  ./dhcp-stats --help \n\n  ./dhcp-stats -h \nPopis:\n    Sieťový analyzátor, ktorý umožňuje získanie percentuálneho využitia sieťových prefixov\n");
