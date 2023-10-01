@@ -26,7 +26,7 @@ public:
     /**
      * @brief Konštruktor triedy Arguments - inicializuje inštančné premenné
      */
-    Arguments();
+    Arguments(WINDOW *prefix_window);
 
     /**
      * @brief Skontroluje a spracuje argumenty zadané na príkazový riadok
@@ -34,6 +34,7 @@ public:
      * @param argv Argumenty programu
      */
     void check(int argc, char *argv[]);
+    void assign_ip_to_prefixes(std::string IP_address);
 
     bool is_interface;
     std::string interface;
@@ -41,6 +42,7 @@ public:
     bool extensions;
     pcap_t *file;
     std::vector<IP_prefix> IP_prefixes;
+    WINDOW *prefix_window;
 
 private:
     /**

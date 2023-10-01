@@ -10,8 +10,9 @@
 /**
  * @brief Konštruktor triedy Arguments - inicializuje inštančné premenné
  */
-Arguments::Arguments() : is_interface(false), is_filename(false), file(nullptr)
+Arguments::Arguments(WINDOW *prefix_window) : is_interface(false), is_filename(false), file(nullptr)
 {
+    this->prefix_window = prefix_window;
 }
 
 /**
@@ -47,7 +48,7 @@ void Arguments::check(int argc, char *argv[])
             this->interface = (std::string)argv[argument_number + NEXT_ARGUMENT];
             argument_number++;
         }
-        else if(!std::strcmp(argv[argument_number], "--ext"))
+        else if (!std::strcmp(argv[argument_number], "--ext"))
         {
             this->extensions = true;
         }
@@ -66,6 +67,7 @@ void Arguments::check(int argc, char *argv[])
             }
             IP_prefix prefix((std::string)argv[argument_number]);
             this->IP_prefixes.push_back(prefix);
+            prefix.write_prefix(this->prefix_window, this->IP_prefixes.size());
         }
         else
         {
@@ -75,6 +77,11 @@ void Arguments::check(int argc, char *argv[])
     if (this->is_interface && this->is_filename || !this->is_interface && !this->is_filename)
     {
         error_exit("Chybná kombinácia argumentov programu - je nutné použiť rozhranie alebo súbor\n");
+    }
+
+    if (this->IP_prefixes.empty())
+    {
+        error_exit("Chybná kombinácia argumentov programu - je nutné zadať aspoň jeden prefix\n");
     }
 }
 
@@ -214,6 +221,30 @@ void Arguments::check_mask(std::string mask)
     if (!this->is_in_interval(mask, 0, 32))
     {
         error_exit("Prefix nemá požadovaný formát\n");
+    }
+}
+
+void Arguments::assign_ip_to_prefixes(std::string IP_address)
+{
+    for (IP_prefix prefix_interator : this->IP_prefixes)
+    {
+        if (prefix_interator.match_prefix(IP_address) && !prefix_interator.is_IP_in_vector(IP_address))
+        {
+            for (size_t i = 0; i < this->IP_prefixes.size(); ++i)
+            {
+                if (this->IP_prefixes[i].prefix == prefix_interator.prefix && !prefix_interator.is_network_broadcast_address(IP_address))
+                {
+                    this->IP_prefixes[i].IP_addresses.push_back(IP_address);
+                    if (this->IP_prefixes[i].maximum == 0)
+                    {
+                        return;
+                    }
+                    this->IP_prefixes[i].used++;
+                    this->IP_prefixes[i].calculate_usage(this->IP_prefixes[i].prefix);
+                    this->IP_prefixes[i].write_prefix(this->prefix_window, i + 1);
+                }
+            }
+        }
     }
 }
 

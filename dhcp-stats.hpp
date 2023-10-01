@@ -8,5 +8,7 @@
 #pragma once
 
 #include "Arguments.hpp"
+#include "DHCP.hpp"
 
 #define ERROR -1
+#define DHCP_SETTINGS "udp port 67 or udp port 68"

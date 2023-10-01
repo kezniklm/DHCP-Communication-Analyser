@@ -27,8 +27,16 @@ IP_prefix::IP_prefix(std::string prefix)
 double IP_prefix::calculate_usage(std::string prefix)
 {
     int used = this->IP_addresses.size();
-    this->usage = ((float)used / (float)this->maximum);
-    return this->usage;
+    if (this->maximum == 0)
+    {
+        this->usage = 0.0;
+    }
+    else
+    {
+        this->usage = ((float)used / (float)this->maximum) * 100;
+    }
+
+    return this->usage * 100;
 }
 
 /**
@@ -64,6 +72,54 @@ void IP_prefix::delete_IP_from_vector(std::string IP_address)
     {
         error_exit("Je možné vymazávať iba IP adresy nachádzajúce sa vo vectore IP_adresses\n");
     }
+}
+
+bool IP_prefix::match_prefix(const std::string &ip)
+{
+    // Split the prefix into address and network bits
+    std::string address = prefix.substr(0, prefix.find('/'));
+    int network_bits = std::stoi(prefix.substr(prefix.find('/') + 1));
+
+    // printf("%s,%s", ip.c_str(), prefix.c_str());
+    // fflush(stdout);
+
+    // Split the IP address into octets
+    std::vector<int> ip_octets;
+    std::stringstream ss(ip);
+    std::string octet;
+    while (getline(ss, octet, '.'))
+    {
+        ip_octets.push_back(std::stoi(octet));
+    }
+
+    // Split the prefix address into octets
+    std::vector<int> prefix_octets;
+    std::stringstream ss2(address);
+    while (getline(ss2, octet, '.'))
+    {
+        prefix_octets.push_back(std::stoi(octet));
+    }
+
+    // Compare octets up to the network_bits
+    for (int i = 0; i < network_bits / 8; ++i)
+    {
+        if (ip_octets[i] != prefix_octets[i])
+        {
+            return false;
+        }
+    }
+
+    // If network_bits is not a multiple of 8, compare the remaining bits
+    if (network_bits % 8 != 0)
+    {
+        int mask = 0xFF << (8 - (network_bits % 8));
+        if ((ip_octets[network_bits / 8] & mask) != (prefix_octets[network_bits / 8] & mask))
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 /**
@@ -106,6 +162,72 @@ int IP_prefix::calculate_maximum_usage(std::string prefix)
 
     // Výpočet dostupných adries
     int availableAddresses = 1 << (32 - prefixLength);
+    if ((availableAddresses - NETWORK_ADRESS - BROADCAST_ADRESS) == 0)
+    {
+        warning_msg("Prefix nemá voľné žiadne adresy!");
+        return 0;
+    }
+    else
+    {
+        return (availableAddresses - NETWORK_ADRESS - BROADCAST_ADRESS);
+    }
+}
 
-    return (availableAddresses - NETWORK_ADRESS - BROADCAST_ADRESS);
+void IP_prefix::write_prefix(WINDOW *prefix_window, int number_of_prefix)
+{
+    mvwprintw(prefix_window, number_of_prefix, 1, "%s", this->prefix.c_str());
+    mvwprintw(prefix_window, number_of_prefix, 20, "%d", this->maximum);
+    mvwprintw(prefix_window, number_of_prefix, 40, "%d", this->used);
+    mvwprintw(prefix_window, number_of_prefix, 60, "%.2f%%", this->usage);
+    wnoutrefresh(prefix_window);
+    doupdate();
+}
+
+bool IP_prefix::is_network_broadcast_address(std::string IP_address)
+{
+    // Split the IP address and prefix into components
+    std::vector<std::string> ipParts = split(IP_address, '.');
+    std::vector<std::string> prefixParts = split(this->prefix, '/');
+    // Ensure that both the IP and prefix have valid components
+    if (ipParts.size() != 4 || prefixParts.size() != 2)
+    {
+        return false;
+    }
+
+    // Extract the IP address and prefix length
+    std::string ipAddress = ipParts[0] + "." + ipParts[1] + "." + ipParts[2] + "." + ipParts[3];
+    int prefixLength = std::stoi(prefixParts[1]);
+
+    // Calculate the network address and broadcast address based on the prefix
+    int subnetMask = (0xFFFFFFFF << (32 - prefixLength));
+    int networkAddress = (std::stoi(ipParts[0]) << 24) | (std::stoi(ipParts[1]) << 16) | (std::stoi(ipParts[2]) << 8) | std::stoi(ipParts[3]);
+    networkAddress = networkAddress & subnetMask; // Corrected network address calculation
+    int broadcastAddress = networkAddress | (~subnetMask);
+
+    // Convert the calculated network and broadcast addresses to string format
+    std::string networkAddressStr = std::to_string((networkAddress >> 24) & 0xFF) + "." +
+                                    std::to_string((networkAddress >> 16) & 0xFF) + "." +
+                                    std::to_string((networkAddress >> 8) & 0xFF) + "." +
+                                    std::to_string(networkAddress & 0xFF);
+
+    std::string broadcastAddressStr = std::to_string((broadcastAddress >> 24) & 0xFF) + "." +
+                                      std::to_string((broadcastAddress >> 16) & 0xFF) + "." +
+                                      std::to_string((broadcastAddress >> 8) & 0xFF) + "." +
+                                      std::to_string(broadcastAddress & 0xFF);
+
+    // Check if the IP address matches either the network or broadcast address
+    return (ipAddress == networkAddressStr) || (ipAddress == broadcastAddressStr);
+}
+
+// Function to split a string by a delimiter and return a vector of substrings - upratať potom
+std::vector<std::string> split(const std::string &s, char delimiter)
+{
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(s);
+    while (std::getline(tokenStream, token, delimiter))
+    {
+        tokens.push_back(token);
+    }
+    return tokens;
 }

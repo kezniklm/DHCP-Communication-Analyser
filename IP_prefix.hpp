@@ -11,6 +11,7 @@
 #include <vector>
 #include <sstream>
 #include <bitset>
+#include <ncurses.h>
 
 #include "error.hpp"
 
@@ -48,6 +49,8 @@ public:
      */
     void delete_IP_from_vector(std::string IP_address);
 
+    bool match_prefix(const std::string &ip);
+
     /**
      * @brief Zistí, či sa IP adresa nachádza vo vektore IP_adresses
      * @param IP_address IP adresa, ktorá sa má nájsť
@@ -63,6 +66,8 @@ public:
      * @brief IP adresy, ktoré prefix obsahuje
      */
     std::vector<std::string> IP_addresses;
+    void write_prefix(WINDOW *prefix_window, int number_of_prefix);
+    bool is_network_broadcast_address(std::string IP_address);
 
 private:
     /**
@@ -72,3 +77,5 @@ private:
      */
     int calculate_maximum_usage(std::string prefix);
 };
+
+std::vector<std::string> split(const std::string &s, char delimiter);
