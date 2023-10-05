@@ -160,13 +160,13 @@ bool DHCP::check_MAC_IP_pair(std::string IP_address, std::string MAC_address)
 {
     for (auto iterator = this->clients_without_ip.begin(); iterator < this->clients_without_ip.end(); iterator++)
     {
-        if (!(iterator->get_IP_address() == IP_address && iterator->get_MAC_address() == MAC_address))
+        if (iterator->get_IP_address() == IP_address && iterator->get_MAC_address() == MAC_address)
         {
             this->clients_without_ip.erase(iterator);
-            return false;
+            return true;
         }
     }
-    return true;
+    return false;
 }
 
 /**
@@ -178,12 +178,8 @@ bool DHCP::is_negotiation_complete(std::string MAC)
 {
     for (long unsigned int i = 0; i < this->clients_without_ip.size(); i++)
     {
-        // printf("%s a %s", MAC_to_uppercase(this->clients_without_ip[i].get_MAC_address()).c_str(), MAC_to_uppercase(MAC).c_str());
-        // fflush(stdout);
         if (MAC_to_uppercase(this->clients_without_ip[i].get_MAC_address()) == MAC_to_uppercase(MAC))
         {
-            // printf("%d,%d,%d,%d",this->clients_without_ip[i].has_discover,this->clients_without_ip[i].has_offer,this->clients_without_ip[i].has_request,this->clients_without_ip[i].has_ack);
-            // fflush(stdout);
             if (!this->clients_without_ip[i].has_discover || !this->clients_without_ip[i].has_offer || !this->clients_without_ip[i].has_request || !this->clients_without_ip[i].has_ack)
             {
                 return false;
