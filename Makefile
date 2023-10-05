@@ -6,7 +6,7 @@
 #Prelozene: GCC 11.3.0
 
 CC = g++
-CFLAGS = -std=c++20 -pedantic -Wextra -Werror -g -fcommon -D_DEFAULT_SOURCE -lpcap 
+CFLAGS = -std=c++20 -pedantic -Wextra -Werror -g -fcommon -lpcap 
 
 .PHONY: error.o Arguments.o dhcp-stats.o dhcp-stats zip clean
 
