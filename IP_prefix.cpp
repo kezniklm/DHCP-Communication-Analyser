@@ -26,7 +26,7 @@ IP_prefix::IP_prefix(std::string prefix)
  */
 double IP_prefix::calculate_usage(std::string prefix)
 {
-    int used = this->IP_addresses.size();
+    int used = this->Clients.size();
     if (this->maximum == 0)
     {
         this->usage = 0.0;
@@ -43,27 +43,28 @@ double IP_prefix::calculate_usage(std::string prefix)
  * @brief Pridá IP adresu do vektoru IP_adresses
  * @param IP_address IP adresa na pridanie
  */
-void IP_prefix::add_IP_to_vector(std::string IP_address)
+void IP_prefix::add_IP_to_vector(std::string IP_address, std::string MAC_address)
 {
     if (!this->is_IP_in_vector(IP_address))
     {
-        this->IP_addresses.push_back(IP_address);
+        Client client(IP_address, MAC_address);
+        this->Clients.push_back(client);
     }
 }
 
 /**
- * @brief Odstráni IP adresu z vektoru IP_adresses
- * @param IP_address IP adresa na vymazanie
+ * @brief Odstráni klienta adresu z vektoru Clients
+ * @param IP_address Klient s IP adresou IP_address bude vymazaný
  */
-void IP_prefix::delete_IP_from_vector(std::string IP_address)
+void IP_prefix::delete_from_vector(std::string IP_address, std::string MAC_address)
 {
     if (this->is_IP_in_vector(IP_address))
     {
-        for (auto IP_address_interator = IP_addresses.begin(); IP_address_interator != IP_addresses.end(); ++IP_address_interator)
+        for (auto clients_interator = Clients.begin(); clients_interator != Clients.end(); ++clients_interator)
         {
-            if (*IP_address_interator == IP_address)
+            if (clients_interator->get_IP_address() == IP_address && clients_interator->get_MAC_address() == MAC_address)
             {
-                this->IP_addresses.erase(IP_address_interator);
+                this->Clients.erase(clients_interator);
                 break;
             }
         }
@@ -74,25 +75,104 @@ void IP_prefix::delete_IP_from_vector(std::string IP_address)
     }
 }
 
-bool IP_prefix::match_prefix(const std::string &ip)
+/**
+ * @brief Vráti prefix
+ * @return
+ */
+std::string IP_prefix::get_prefix()
 {
-    // Split the prefix into address and network bits
+    return this->prefix;
+}
+
+/**
+ * @brief Nastaví prefix na honotu new_prefix
+ * @param new_prefix
+ */
+void IP_prefix::set_prefix(std::string new_prefix)
+{
+    this->prefix = new_prefix;
+}
+
+/**
+ * @brief Vráti maximum
+ * @return
+ */
+int IP_prefix::get_maximum()
+{
+    return this->maximum;
+}
+
+/**
+ * @brief Nastaví maximum na hodnotu new_maximum
+ * @param new_maximum
+ */
+void IP_prefix::set_maximum(int new_maximum)
+{
+    this->maximum = new_maximum;
+}
+
+/**
+ * @brief Vráti hodnotu used
+ * @return
+ */
+int IP_prefix::get_used()
+{
+    return this->used;
+}
+
+/**
+ * @brief Nastaví hodnotu used na hodnotu new_used
+ * @param new_used
+ */
+void IP_prefix::set_used(int new_used)
+{
+    this->used = new_used;
+}
+
+/**
+ * @brief Vráti usage
+ * @return
+ */
+double IP_prefix::get_usage()
+{
+    return this->usage;
+}
+
+/**
+ * @brief Nastaví usage na hodnotu new_usage
+ * @param new_usage
+ */
+void IP_prefix::set_usage(double new_usage)
+{
+    this->usage = new_usage;
+}
+
+std::vector<Client> IP_prefix::get_clients_vector()
+{
+    return this->Clients;
+}
+
+/**
+ * @brief Zisti či IP adresa patrí do daného prefixu
+ * @param IP_address IP adresa
+ * @return
+ */
+bool IP_prefix::match_prefix(const std::string &IP_address)
+{
+    // Rozdelenie prefixu na adresu siete a počet bitov masky
     std::string address = prefix.substr(0, prefix.find('/'));
     int network_bits = std::stoi(prefix.substr(prefix.find('/') + 1));
 
-    // printf("%s,%s", ip.c_str(), prefix.c_str());
-    // fflush(stdout);
-
-    // Split the IP address into octets
+    // Rozdelenie IP adresy na oktety
     std::vector<int> ip_octets;
-    std::stringstream ss(ip);
+    std::stringstream ss(IP_address);
     std::string octet;
     while (getline(ss, octet, '.'))
     {
         ip_octets.push_back(std::stoi(octet));
     }
 
-    // Split the prefix address into octets
+    // Rozdelenie adresy siete na oktety
     std::vector<int> prefix_octets;
     std::stringstream ss2(address);
     while (getline(ss2, octet, '.'))
@@ -100,7 +180,7 @@ bool IP_prefix::match_prefix(const std::string &ip)
         prefix_octets.push_back(std::stoi(octet));
     }
 
-    // Compare octets up to the network_bits
+    // Porovnanie adries zľava podľa počtu bitov masky
     for (int i = 0; i < network_bits / 8; ++i)
     {
         if (ip_octets[i] != prefix_octets[i])
@@ -109,7 +189,7 @@ bool IP_prefix::match_prefix(const std::string &ip)
         }
     }
 
-    // If network_bits is not a multiple of 8, compare the remaining bits
+    // Pokiaľ počet bitov je menej ako 8
     if (network_bits % 8 != 0)
     {
         int mask = 0xFF << (8 - (network_bits % 8));
@@ -129,9 +209,9 @@ bool IP_prefix::match_prefix(const std::string &ip)
  */
 bool IP_prefix::is_IP_in_vector(std::string IP_address)
 {
-    for (const std::string IP_address_interator : this->IP_addresses)
+    for (Client Clients_interator : this->Clients)
     {
-        if (IP_address_interator == IP_address)
+        if (Clients_interator.get_IP_address() == IP_address)
         {
             return true;
         }
@@ -173,6 +253,11 @@ int IP_prefix::calculate_maximum_usage(std::string prefix)
     }
 }
 
+/**
+ * @brief Vypíše, prípadne prepíše výstupné okno
+ * @param prefix_window Okno ncurses
+ * @param number_of_prefix Poradie prefixu
+ */
 void IP_prefix::write_prefix(WINDOW *prefix_window, int number_of_prefix)
 {
     mvwprintw(prefix_window, number_of_prefix, 1, "%s", this->prefix.c_str());
@@ -183,28 +268,34 @@ void IP_prefix::write_prefix(WINDOW *prefix_window, int number_of_prefix)
     doupdate();
 }
 
+/**
+ * @brief Zistí, či sa nejedná o IP adresu siete alebo broadcastovú adresu siete
+ * @param IP_address IP adresa
+ * @return
+ */
 bool IP_prefix::is_network_broadcast_address(std::string IP_address)
 {
-    // Split the IP address and prefix into components
+    // Rozdelí IP adresu na časti
     std::vector<std::string> ipParts = split(IP_address, '.');
     std::vector<std::string> prefixParts = split(this->prefix, '/');
-    // Ensure that both the IP and prefix have valid components
+
+    // Kontrola, že IP a prefix majú daný poćet častí
     if (ipParts.size() != 4 || prefixParts.size() != 2)
     {
         return false;
     }
 
-    // Extract the IP address and prefix length
+    // Extrahovanie IP adresy siete a  dĺžky prefixu
     std::string ipAddress = ipParts[0] + "." + ipParts[1] + "." + ipParts[2] + "." + ipParts[3];
     int prefixLength = std::stoi(prefixParts[1]);
 
-    // Calculate the network address and broadcast address based on the prefix
+    // Vypočítanie adresy siete a broadcastu podľa prefixu
     int subnetMask = (0xFFFFFFFF << (32 - prefixLength));
     int networkAddress = (std::stoi(ipParts[0]) << 24) | (std::stoi(ipParts[1]) << 16) | (std::stoi(ipParts[2]) << 8) | std::stoi(ipParts[3]);
-    networkAddress = networkAddress & subnetMask; // Corrected network address calculation
+    networkAddress = networkAddress & subnetMask;
     int broadcastAddress = networkAddress | (~subnetMask);
 
-    // Convert the calculated network and broadcast addresses to string format
+    // Prevedenie adresy na string
     std::string networkAddressStr = std::to_string((networkAddress >> 24) & 0xFF) + "." +
                                     std::to_string((networkAddress >> 16) & 0xFF) + "." +
                                     std::to_string((networkAddress >> 8) & 0xFF) + "." +
@@ -215,11 +306,16 @@ bool IP_prefix::is_network_broadcast_address(std::string IP_address)
                                       std::to_string((broadcastAddress >> 8) & 0xFF) + "." +
                                       std::to_string(broadcastAddress & 0xFF);
 
-    // Check if the IP address matches either the network or broadcast address
+    // Pokiaľ sa nejedná o broadcast alebo adresu siete, vracia false
     return (ipAddress == networkAddressStr) || (ipAddress == broadcastAddressStr);
 }
 
-// Function to split a string by a delimiter and return a vector of substrings - upratať potom
+/**
+ * @brief Rozdelí string na časti podľa delimetra
+ * @param s String na rozdelenie
+ * @param delimiter Delimeter
+ * @return
+ */
 std::vector<std::string> split(const std::string &s, char delimiter)
 {
     std::vector<std::string> tokens;
@@ -230,4 +326,51 @@ std::vector<std::string> split(const std::string &s, char delimiter)
         tokens.push_back(token);
     }
     return tokens;
+}
+
+/**
+ * @brief Konštruktor triedy Client
+ * @param IP_address IP adresa
+ * @param MAC_address MAC adresa
+ */
+Client::Client(std::string IP_address, std::string MAC_address)
+{
+    this->IP_address = IP_address;
+    this->MAC_address = MAC_address;
+}
+
+/**
+ * @brief Vráti IP adresu klienta
+ * @return
+ */
+std::string Client::get_IP_address()
+{
+    return this->IP_address;
+}
+
+/**
+ * @brief Nastaví IP adresu podľa zadaného parametra
+ * @param IP_address IP_adresa
+ */
+void Client::set_IP_address(std::string IP_address)
+{
+    this->IP_address = IP_address;
+}
+
+/**
+ * @brief Vráti MAC adresu klienta
+ * @return
+ */
+std::string Client::get_MAC_address()
+{
+    return this->MAC_address;
+}
+
+/**
+ * @brief Nastaví MAC adresu podľa zadaného parametra
+ * @param MAC_address MAC adresa
+ */
+void Client::set_MAC_address(std::string MAC_address)
+{
+    this->MAC_address = MAC_address;
 }
