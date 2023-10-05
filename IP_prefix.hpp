@@ -74,10 +74,9 @@ public:
 
     /**
      * @brief Vypočíta percentuálne využitie prefixu
-     * @param prefix Prefix s overenou správnosťou
      * @return Percentuálne využitie prefixu
      */
-    double calculate_usage(std::string prefix);
+    double calculate_usage();
 
     /**
      * @brief Pridá IP adresu do vektoru IP_adresses

@@ -255,7 +255,7 @@ void Arguments::add_client_to_prefix_vector(std::string IP_address, std::string 
                     }
                     int old_used = this->IP_prefixes[i].get_used();
                     this->IP_prefixes[i].set_used(++old_used);
-                    this->IP_prefixes[i].calculate_usage(this->IP_prefixes[i].get_prefix());
+                    this->IP_prefixes[i].calculate_usage();
                     this->IP_prefixes[i].write_prefix(this->prefix_window, i + 1);
                 }
             }
@@ -286,7 +286,7 @@ void Arguments::release(std::string IP_address, std::string MAC_address)
 
                     int old_used = this->IP_prefixes[i].get_used();
                     this->IP_prefixes[i].set_used(--old_used);
-                    this->IP_prefixes[i].calculate_usage(this->IP_prefixes[i].get_prefix());
+                    this->IP_prefixes[i].calculate_usage();
                     this->IP_prefixes[i].write_prefix(this->prefix_window, i + 1);
                 }
             }

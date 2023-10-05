@@ -21,10 +21,9 @@ IP_prefix::IP_prefix(std::string prefix)
 
 /**
  * @brief Vypočíta percentuálne využitie prefixu
- * @param prefix Prefix s overenou správnosťou
  * @return Percentuálne využitie prefixu
  */
-double IP_prefix::calculate_usage(std::string prefix)
+double IP_prefix::calculate_usage()
 {
     int used = this->Clients.size();
     if (this->maximum == 0)
