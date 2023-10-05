@@ -29,22 +29,88 @@ public:
     Arguments(WINDOW *prefix_window);
 
     /**
+     * @brief Deštruktor triedy Arguments - uvoľní pamäť alokovanú pre inštanciu triedy Arguments
+     */
+    ~Arguments();
+
+    /**
      * @brief Skontroluje a spracuje argumenty zadané na príkazový riadok
      * @param argc Počet argumentov programu
      * @param argv Argumenty programu
      */
     void check(int argc, char *argv[]);
-    void assign_ip_to_prefixes(std::string IP_address);
+
+    /**
+     * @brief Pridá klienta do vectoru prefixov
+     * @param IP_address IP adresa klienta
+     * @param MAC_address MAC adresa klienta
+     */
+    void add_client_to_prefix_vector(std::string IP_address, std::string MAC_address);
+
+    /**
+     * @brief Uvoľní klienta z vectoru prefixov
+     * @param IP_address IP adresa klienta
+     * @param MAC_address MAC adresa klienta
+     */
+    void release(std::string IP_address, std::string MAC_address);
+
+    /**
+     * @brief Vráti interface
+     * @return
+     */
+    std::string get_interface();
+
+    /**
+     * @brief Nastaví interface na hodnotu new_interface
+     * @param new_interface Nový interface
+     */
+    void set_interface(std::string new_interface);
+
+    /**
+     * @brief Vráti file descriptor pcap súboru
+     * @return
+     */
+    pcap_t *get_file();
+
+    /**
+     * @brief Nastaví file descriptor pcap súboru na new_file
+     * @param new_file
+     */
+    void set_file(pcap_t *new_file);
+
+    /**
+     * @brief Vráti prefix_window
+     * @return
+     */
+    WINDOW *get_prefix_window();
+
+    /**
+     * @brief Nastaví prefix window na hodnotu new_prefix_window
+     * @param new_prefix_window
+     */
+    void set_prefix_window(WINDOW *new_prefix_window);
+
+    /**
+     * @brief Vráti vector IP prefixov
+     * @return
+     */
+    std::vector<IP_prefix> get_IP_prefixes();
+
+    bool is_filename;
 
     bool is_interface;
-    std::string interface;
-    bool is_filename;
+
     bool extensions;
-    pcap_t *file;
-    std::vector<IP_prefix> IP_prefixes;
-    WINDOW *prefix_window;
 
 private:
+    std::string interface;
+
+    pcap_t *file;
+
+    std::vector<IP_prefix> IP_prefixes;
+
+    WINDOW *prefix_window;
+
     /**
      * @brief Skontroluje prítomnosť a korektnosť druhého argumentu po aktuálnom argumente
      * @param argv Vstupné argumenty
@@ -100,5 +166,5 @@ private:
      * @param target Prefix, ktorý má byť skontrolovaný
      * @return
      */
-    bool is_prefix_in_vector(const IP_prefix &target);
+    bool is_prefix_in_vector(IP_prefix target);
 };

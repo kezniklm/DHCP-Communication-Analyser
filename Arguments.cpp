@@ -16,6 +16,14 @@ Arguments::Arguments(WINDOW *prefix_window) : is_interface(false), is_filename(f
 }
 
 /**
+ * @brief Deštruktor triedy Arguments - uvoľní pamäť alokovanú pre inštanciu triedy Arguments
+ */
+Arguments::~Arguments()
+{
+    this->IP_prefixes.clear();
+}
+
+/**
  * @brief Skontroluje a spracuje argumenty zadané na príkazový riadok
  * @param argc Počet argumentov programu
  * @param argv Argumenty programu
@@ -33,19 +41,20 @@ void Arguments::check(int argc, char *argv[])
         {
             this->is_another_argument(argv, argument_number);
             char errbuf[PCAP_ERRBUF_SIZE];
-            this->file = pcap_open_offline(argv[argument_number + NEXT_ARGUMENT], errbuf);
-            if (this->file == nullptr)
+            pcap_t *file = pcap_open_offline(argv[argument_number + NEXT_ARGUMENT], errbuf);
+            if (file == nullptr)
             {
                 error_exit("Chyba pri otváraní .pcap súboru %s\n", errbuf);
             }
             this->is_filename = true;
+            this->set_file(file);
             argument_number++;
         }
         else if (!std::strcmp(argv[argument_number], "-i") && !this->is_interface)
         {
             this->is_another_argument(argv, argument_number);
             this->is_interface = true;
-            this->interface = (std::string)argv[argument_number + NEXT_ARGUMENT];
+            this->set_interface((std::string)argv[argument_number + NEXT_ARGUMENT]);
             argument_number++;
         }
         else if (!std::strcmp(argv[argument_number], "--ext"))
@@ -154,7 +163,7 @@ void Arguments::check_overlap(std::string prefix)
     {
         int number = std::stoi(octet);
 
-        // Convert the integer to its binary representation
+        // Konvertuje integer na jeho binárnu repreyentáciu
         std::bitset<8> binary_representation(number);
         for (int i = binary_representation.size() - 1; i >= 0; --i)
         {
@@ -224,7 +233,12 @@ void Arguments::check_mask(std::string mask)
     }
 }
 
-void Arguments::assign_ip_to_prefixes(std::string IP_address)
+/**
+ * @brief Pridá klienta do vectoru prefixov
+ * @param IP_address IP adresa klienta
+ * @param MAC_address MAC adresa klienta
+ */
+void Arguments::add_client_to_prefix_vector(std::string IP_address, std::string MAC_address)
 {
     for (IP_prefix prefix_interator : this->IP_prefixes)
     {
@@ -232,20 +246,115 @@ void Arguments::assign_ip_to_prefixes(std::string IP_address)
         {
             for (size_t i = 0; i < this->IP_prefixes.size(); ++i)
             {
-                if (this->IP_prefixes[i].prefix == prefix_interator.prefix && !prefix_interator.is_network_broadcast_address(IP_address))
+                if (this->IP_prefixes[i].get_prefix() == prefix_interator.get_prefix() && !prefix_interator.is_network_broadcast_address(IP_address))
                 {
-                    this->IP_prefixes[i].IP_addresses.push_back(IP_address);
-                    if (this->IP_prefixes[i].maximum == 0)
+                    this->IP_prefixes[i].add_IP_to_vector(IP_address, MAC_address);
+                    if (this->IP_prefixes[i].get_maximum() == 0)
                     {
                         return;
                     }
-                    this->IP_prefixes[i].used++;
-                    this->IP_prefixes[i].calculate_usage(this->IP_prefixes[i].prefix);
+                    int old_used = this->IP_prefixes[i].get_used();
+                    this->IP_prefixes[i].set_used(++old_used);
+                    this->IP_prefixes[i].calculate_usage(this->IP_prefixes[i].get_prefix());
                     this->IP_prefixes[i].write_prefix(this->prefix_window, i + 1);
                 }
             }
         }
     }
+}
+
+/**
+ * @brief Uvoľní klienta z vectoru prefixov
+ * @param IP_address IP adresa klienta
+ * @param MAC_address MAC adresa klienta
+ */
+void Arguments::release(std::string IP_address, std::string MAC_address)
+{
+    for (IP_prefix prefix_interator : this->IP_prefixes)
+    {
+        if (prefix_interator.match_prefix(IP_address) && prefix_interator.is_IP_in_vector(IP_address))
+        {
+            for (size_t i = 0; i < this->IP_prefixes.size(); ++i)
+            {
+                if (this->IP_prefixes[i].get_prefix() == prefix_interator.get_prefix() && !prefix_interator.is_network_broadcast_address(IP_address))
+                {
+                    if (this->IP_prefixes[i].get_maximum() == 0)
+                    {
+                        return;
+                    }
+                    this->IP_prefixes[i].delete_from_vector(IP_address, MAC_address);
+
+                    int old_used = this->IP_prefixes[i].get_used();
+                    this->IP_prefixes[i].set_used(--old_used);
+                    this->IP_prefixes[i].calculate_usage(this->IP_prefixes[i].get_prefix());
+                    this->IP_prefixes[i].write_prefix(this->prefix_window, i + 1);
+                }
+            }
+        }
+    }
+}
+
+/**
+ * @brief Vráti interface
+ * @return
+ */
+std::string Arguments::get_interface()
+{
+    return this->interface;
+}
+
+/**
+ * @brief Nastaví interface na hodnotu new_interface
+ * @param new_interface Nový interface
+ */
+void Arguments::set_interface(std::string new_interface)
+{
+    this->interface = new_interface;
+}
+
+/**
+ * @brief Vráti file descriptor pcap súboru
+ * @return
+ */
+pcap_t *Arguments::get_file()
+{
+    return this->file;
+}
+
+/**
+ * @brief Nastaví file descriptor pcap súboru na new_file
+ * @param new_file
+ */
+void Arguments::set_file(pcap_t *new_file)
+{
+    this->file = new_file;
+}
+
+/**
+ * @brief Vráti prefix_window
+ * @return
+ */
+WINDOW *Arguments::get_prefix_window()
+{
+    return this->prefix_window;
+}
+
+/**
+ * @brief Nastaví prefix window na hodnotu new_prefix_window
+ * @param new_prefix_window
+ */
+void Arguments::set_prefix_window(WINDOW *new_prefix_window)
+{
+    this->prefix_window = new_prefix_window;
+}
+
+/**
+ * @brief Vráti vector IP prefixov
+ * @return 
+ */
+std::vector<IP_prefix> Arguments::get_IP_prefixes()
+{
+    return this->IP_prefixes;
 }
 
 /**
@@ -282,11 +391,11 @@ bool Arguments::is_in_interval(std::string to_check, int start, int end)
  * @param target Prefix, ktorý má byť skontrolovaný
  * @return
  */
-bool Arguments::is_prefix_in_vector(const IP_prefix &target)
+bool Arguments::is_prefix_in_vector(IP_prefix target)
 {
-    for (const IP_prefix &prefix_interator : this->IP_prefixes)
+    for (IP_prefix prefix_interator : this->IP_prefixes)
     {
-        if (prefix_interator.prefix == target.prefix)
+        if (prefix_interator.get_prefix() == target.get_prefix())
         {
             return true;
         }
