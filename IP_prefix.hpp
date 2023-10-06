@@ -15,51 +15,10 @@
 #include <syslog.h>
 
 #include "error.hpp"
+#include "Clients.hpp"
 
 #define NETWORK_ADRESS 1
 #define BROADCAST_ADRESS 1
-
-/**
- * @brief Trieda predstavujúca klienta v rámci IP prefixu
- */
-class Client
-{
-private:
-    std::string IP_address;
-    std::string MAC_address;
-
-public:
-    /**
-     * @brief Konštruktor triedy Client
-     * @param IP_address IP adresa
-     * @param MAC_address MAC adresa
-     */
-    Client(std::string IP_address, std::string MAC_address);
-
-    /**
-     * @brief Vráti IP adresu klienta
-     * @return
-     */
-    std::string get_IP_address();
-
-    /**
-     * @brief Nastaví IP adresu podľa zadaného parametra
-     * @param IP_address IP_adresa
-     */
-    void set_IP_address(std::string IP_address);
-
-    /**
-     * @brief Vráti MAC adresu klienta
-     * @return
-     */
-    std::string get_MAC_address();
-
-    /**
-     * @brief Nastaví MAC adresu podľa zadaného parametra
-     * @param MAC_address MAC adresa
-     */
-    void set_MAC_address(std::string MAC_address);
-};
 
 /**
  * @brief Trieda obsahujúca informácie o IP prefixe a metódy s ním spojené
@@ -82,12 +41,14 @@ public:
     /**
      * @brief Pridá IP adresu do vektoru IP_adresses
      * @param IP_address IP adresa na pridanie
+     * @param MAC_address MAC adresa na pridanie
      */
     void add_IP_to_vector(std::string IP_address, std::string MAC_address);
 
     /**
      * @brief Odstráni IP adresu z vektoru IP_adresses
      * @param IP_address IP adresa na vymazanie
+     * @param MAC_address MAC adresa na vymazanie
      */
     void delete_from_vector(std::string IP_address, std::string MAC_address);
 

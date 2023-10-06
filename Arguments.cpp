@@ -204,7 +204,7 @@ void Arguments::check_ip_format(std::string ip_address)
  * @brief Skontroluje octety IPV4 adresy aby boli v intervale <0,255>
  *
  * @param octet
- * @param octet_num
+ * @param octet_number
  */
 void Arguments::check_scope(std::string octet, int *octet_number)
 {

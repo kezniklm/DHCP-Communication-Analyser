@@ -135,7 +135,7 @@ private:
     /**
      * @brief Skontroluje formát zadanej IPV4 adresy
      *
-     * @param ip_adress
+     * @param ip_address
      */
     void check_ip_format(std::string ip_address);
 
@@ -143,9 +143,9 @@ private:
      * @brief Skontroluje octety IPV4 adresy aby boli v intervale <0,255>
      *
      * @param octet
-     * @param octet_num
+     * @param octet_number
      */
-    void check_scope(std::string octet, int *octet_num);
+    void check_scope(std::string octet, int *octet_number);
 
     /**
      * @brief Skontroluje počet bitov masky tak, aby bol v intervale <0,32>

@@ -41,6 +41,7 @@ double IP_prefix::calculate_usage()
 /**
  * @brief Pridá IP adresu do vektoru IP_adresses
  * @param IP_address IP adresa na pridanie
+ * @param MAC_address MAC adresa na pridanie
  */
 void IP_prefix::add_IP_to_vector(std::string IP_address, std::string MAC_address)
 {
@@ -52,8 +53,9 @@ void IP_prefix::add_IP_to_vector(std::string IP_address, std::string MAC_address
 }
 
 /**
- * @brief Odstráni klienta adresu z vektoru Clients
- * @param IP_address Klient s IP adresou IP_address bude vymazaný
+ * @brief Odstráni IP adresu z vektoru IP_adresses
+ * @param IP_address IP adresa na vymazanie
+ * @param MAC_address MAC adresa na vymazanie
  */
 void IP_prefix::delete_from_vector(std::string IP_address, std::string MAC_address)
 {
@@ -340,51 +342,4 @@ std::vector<std::string> split(const std::string &s, char delimiter)
         tokens.push_back(token);
     }
     return tokens;
-}
-
-/**
- * @brief Konštruktor triedy Client
- * @param IP_address IP adresa
- * @param MAC_address MAC adresa
- */
-Client::Client(std::string IP_address, std::string MAC_address)
-{
-    this->IP_address = IP_address;
-    this->MAC_address = MAC_address;
-}
-
-/**
- * @brief Vráti IP adresu klienta
- * @return
- */
-std::string Client::get_IP_address()
-{
-    return this->IP_address;
-}
-
-/**
- * @brief Nastaví IP adresu podľa zadaného parametra
- * @param IP_address IP_adresa
- */
-void Client::set_IP_address(std::string IP_address)
-{
-    this->IP_address = IP_address;
-}
-
-/**
- * @brief Vráti MAC adresu klienta
- * @return
- */
-std::string Client::get_MAC_address()
-{
-    return this->MAC_address;
-}
-
-/**
- * @brief Nastaví MAC adresu podľa zadaného parametra
- * @param MAC_address MAC adresa
- */
-void Client::set_MAC_address(std::string MAC_address)
-{
-    this->MAC_address = MAC_address;
 }
