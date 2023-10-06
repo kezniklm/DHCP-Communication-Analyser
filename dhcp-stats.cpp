@@ -72,6 +72,9 @@ void packet_handler(u_char *args, const struct pcap_pkthdr *header, const u_char
 int main(int argc, char *argv[])
 {
     signal(SIGINT, signal_handler);
+
+    openlog("dhcp-client", LOG_PID, LOG_USER);
+    
     initscr();                                     // Inicializácia NCurses
     cbreak();                                      // Přerušenie řiadkového bufferovania
     noecho();                                      // Vypnutie zobrazovania znakov na obrazovke
@@ -142,6 +145,8 @@ int main(int argc, char *argv[])
 
     pcap_freecode(&fp);
     pcap_close(opened_session);
+
+    closelog();
 
     delwin(prefix_window);
     endwin();

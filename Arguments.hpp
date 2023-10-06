@@ -9,6 +9,7 @@
 
 #include <pcap.h>
 #include <cstring>
+#include <syslog.h>
 
 #include "IP_prefix.hpp"
 

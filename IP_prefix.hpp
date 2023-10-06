@@ -12,6 +12,7 @@
 #include <sstream>
 #include <bitset>
 #include <ncurses.h>
+#include <syslog.h>
 
 #include "error.hpp"
 
@@ -166,7 +167,16 @@ public:
      */
     void set_usage(double new_usage);
 
+    /**
+     * @brief Vráti vektor clientov pre daný prefix
+     * @return
+     */
     std::vector<Client> get_clients_vector();
+
+    /**
+     * @brief V prípade, že počet alokovaných adries v prefixe prekročí 50%, zaloguje túto informáciu cez standardní syslog mechanismus do logu
+     */
+    void has_50_percent();
 
 private:
     std::string prefix;

@@ -75,6 +75,17 @@ void IP_prefix::delete_from_vector(std::string IP_address, std::string MAC_addre
 }
 
 /**
+ * @brief V prípade, že počet alokovaných adries v prefixe prekročí 50%, zaloguje túto informáciu cez standardní syslog mechanismus do logu
+ */
+void IP_prefix::has_50_percent()
+{
+    if (this->get_usage() > 50.00)
+    {
+        syslog(LOG_WARNING, "prefix %s exceeded 50%% of allocations.", this->get_prefix().c_str());
+    }
+}
+
+/**
  * @brief Vráti prefix
  * @return
  */
@@ -146,6 +157,10 @@ void IP_prefix::set_usage(double new_usage)
     this->usage = new_usage;
 }
 
+/**
+ * @brief Vráti vektor clientov pre daný prefix
+ * @return
+ */
 std::vector<Client> IP_prefix::get_clients_vector()
 {
     return this->Clients;
