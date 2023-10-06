@@ -16,6 +16,7 @@
 
 #include "error.hpp"
 #include "Clients.hpp"
+#include "Utils.hpp"
 
 #define NETWORK_ADRESS 1
 #define BROADCAST_ADRESS 1
@@ -160,11 +161,3 @@ private:
      */
     int calculate_maximum_usage(std::string prefix);
 };
-
-/**
- * @brief Rozdelí string na časti podľa delimetra
- * @param s String na rozdelenie
- * @param delimiter Delimeter
- * @return
- */
-std::vector<std::string> split(const std::string &s, char delimiter);

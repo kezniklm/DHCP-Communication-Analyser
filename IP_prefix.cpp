@@ -325,21 +325,3 @@ bool IP_prefix::is_network_broadcast_address(std::string IP_address)
     // Pokiaľ sa nejedná o broadcast alebo adresu siete, vracia false
     return (ipAddress == networkAddressStr) || (ipAddress == broadcastAddressStr);
 }
-
-/**
- * @brief Rozdelí string na časti podľa delimetra
- * @param s String na rozdelenie
- * @param delimiter Delimeter
- * @return
- */
-std::vector<std::string> split(const std::string &s, char delimiter)
-{
-    std::vector<std::string> tokens;
-    std::string token;
-    std::istringstream tokenStream(s);
-    while (std::getline(tokenStream, token, delimiter))
-    {
-        tokens.push_back(token);
-    }
-    return tokens;
-}
