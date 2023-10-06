@@ -163,7 +163,7 @@ void Arguments::check_overlap(std::string prefix)
     {
         int number = std::stoi(octet);
 
-        // Konvertuje integer na jeho binárnu repreyentáciu
+        // Konvertuje integer na jeho binárnu reprezentáciu
         std::bitset<8> binary_representation(number);
         for (int i = binary_representation.size() - 1; i >= 0; --i)
         {

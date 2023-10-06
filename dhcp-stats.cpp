@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     signal(SIGINT, signal_handler);
 
     openlog("dhcp-client", LOG_PID, LOG_USER);
-    
+
     initscr();                                     // Inicializácia NCurses
     cbreak();                                      // Přerušenie řiadkového bufferovania
     noecho();                                      // Vypnutie zobrazovania znakov na obrazovke

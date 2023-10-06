@@ -43,7 +43,8 @@ std::string DHCP::extract_ciaddr(const pcap_pkthdr *header, const u_char *packet
  */
 bool DHCP::is_message_of_type(const struct pcap_pkthdr *header, const u_char *buffer, const int type)
 {
-    u_char *options = (u_char *)buffer + 240; // DHCP options start at byte 240
+    DHCP::packet *dhcp_header = (DHCP::packet *)(buffer + sizeof(struct ether_header) + sizeof(struct ip) + sizeof(struct udphdr));
+    u_char *options = (u_char *)dhcp_header + 240;
     int option_len = header->caplen - 240;
 
     for (int i = 0; i < option_len;)
@@ -202,7 +203,8 @@ void DHCP::add_requested_ip(const pcap_pkthdr *header, const u_char *buffer)
         return;
     }
 
-    u_char *options = (u_char *)buffer + 240; // DHCP options start at byte 240
+    DHCP::packet *dhcp_header = (DHCP::packet *)(buffer + sizeof(struct ether_header) + sizeof(struct ip) + sizeof(struct udphdr));
+    u_char *options = (u_char *)dhcp_header + 240;
     int option_len = header->caplen - 240;
 
     for (int i = 0; i < option_len; i++)
@@ -212,8 +214,6 @@ void DHCP::add_requested_ip(const pcap_pkthdr *header, const u_char *buffer)
         {
             in_addr ip_addr;
             memcpy(&ip_addr, options + i + 2, sizeof(ip_addr));
-
-            // Convert the binary IP address to a human-readable string
             char ip_str[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, &ip_addr, ip_str, sizeof(ip_str));
 
