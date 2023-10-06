@@ -8,6 +8,7 @@
 #pragma once
 
 #include <string>
+#include <arpa/inet.h>
 #include <netinet/ip.h>
 #include <netinet/udp.h>
 #include <netinet/if_ether.h>
