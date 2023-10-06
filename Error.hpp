@@ -1,5 +1,5 @@
 /**
- * @file error.hpp
+ * @file Error.hpp
  * @author Matej Keznikl (xkezni01@stud.fit.vutbr.cz)
  * @brief Hlavičkový súbor obsahujúci prototypy funkcíí z error.cpp
  * @date 2023-11-20

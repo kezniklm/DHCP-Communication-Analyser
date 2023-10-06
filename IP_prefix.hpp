@@ -14,7 +14,7 @@
 #include <ncurses.h>
 #include <syslog.h>
 
-#include "error.hpp"
+#include "Error.hpp"
 #include "Clients.hpp"
 #include "Utils.hpp"
 

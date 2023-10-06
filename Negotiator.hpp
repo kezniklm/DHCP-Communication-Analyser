@@ -8,7 +8,7 @@
 #include <string>
 #include <pcap.h>
 
-#include "error.hpp"
+#include "Error.hpp"
 #include "Utils.hpp"
 
 #define BROADCAST_MAC "FF:FF:FF:FF:FF:FF"

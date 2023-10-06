@@ -19,7 +19,7 @@
 #include <iomanip>
 #include <cstring>
 
-#include "error.hpp"
+#include "Error.hpp"
 #include "Negotiator.hpp"
 
 class DHCP

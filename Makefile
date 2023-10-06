@@ -10,11 +10,11 @@ CFLAGS = -std=c++20 -pedantic -Wextra -Werror -g -fcommon -lpcap
 
 .PHONY: error.o Arguments.o dhcp-stats.o dhcp-stats zip clean
 
-dhcp-stats: error.o Negotiator.o Utils.o Clients.o IP_prefix.o Arguments.o DHCP.o dhcp-stats.o
-	$(CC) $(CFLAGS) error.o Clients.o Utils.o Negotiator.o IP_prefix.o Arguments.o DHCP.o dhcp-stats.o -o dhcp-stats -lpcap -lncurses
+dhcp-stats: Error.o Negotiator.o Utils.o Clients.o IP_prefix.o Arguments.o DHCP.o dhcp-stats.o
+	$(CC) $(CFLAGS) Error.o Clients.o Utils.o Negotiator.o IP_prefix.o Arguments.o DHCP.o dhcp-stats.o -o dhcp-stats -lpcap -lncurses
 
-error.o: error.hpp error.cpp 
-	$(CC) $(CFLAGS) -c error.cpp -o error.o
+Error.o: Error.hpp Error.cpp 
+	$(CC) $(CFLAGS) -c Error.cpp -o Error.o
 
 Arguments.o: Arguments.hpp Arguments.cpp
 	$(CC) $(CFLAGS) -c Arguments.cpp -o Arguments.o
