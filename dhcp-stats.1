@@ -1,0 +1,58 @@
+.Dd October 6, 2023
+.Dt DHCP-STATS 1
+.Os Linux
+.Sh NAME
+.Nm dhcp-stats
+.Nd Monitor and log DHCP network prefix utilization statistics
+.Sh SYNOPSIS
+.Nm
+.Op Fl -r Ar filename
+.Op Fl -i Ar interface-name
+.Ar --ext
+.Ar ip-prefix ...
+.Sh DESCRIPTION
+The
+.Nm
+utility monitors DHCP traffic on a specified network interface or processes pcap files to generate statistics about the utilization of network prefixes specified as arguments. It tracks the allocation of IP addresses within the given prefixes and logs a message if the utilization of any prefix exceeds 50%.
+.Pp
+The
+.Nm
+utility supports the following options and arguments:
+.Bl -tag -width Ds
+.It Fl r Ar filename
+Read input from pcap files instead of live traffic. Specify the filename of the pcap file(s) to analyze.
+.It Fl i Ar interface-name
+Specify the network interface to listen on for live DHCP traffic.
+.It Ar --ext 
+.br
+Enables extensions.                
+.It Ar ip-prefix
+The network prefixes for which utilization statistics will be generated. Multiple prefixes can be provided as separate arguments.
+.El
+.Pp
+If the utilization of any prefix exceeds 50%, the program logs a message using the standard syslog mechanism in the following format:
+.Pp
+"prefix x.x.x.x/y exceeded 50% of allocations."
+.Pp
+For example:
+.Bd -literal
+% dhcp-stats -i eth0 192.168.1.0/24 172.16.32.0/24 192.168.0.0/22
+.Ed
+.Pp
+will monitor DHCP traffic on interface
+`eth0`
+for the network prefixes
+`192.168.1.0/24` ,
+`172.16.32.0/24` , and
+`192.168.0.0/22` .
+.Sh AUTHOR
+This program was written by Matej Keznikl.
+.Pp
+For more information, visit the project's website at:
+.Pa https://github.com/kezniklm/DHCP-Communication-Analyser
+.Sh LICENSE
+This program is free software and is distributed under the terms of the Mozilla Public License Version 2.0.
+.Pp
+.Sh SEE ALSO
+.Xr pcap 3 ,
+.Xr syslog 3
