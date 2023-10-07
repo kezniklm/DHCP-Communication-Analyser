@@ -13,6 +13,8 @@
  */
 void warning_msg(const char *fmt, ...)
 {
+    endwin();
+
     va_list arguments;
     va_start(arguments, fmt);
 
@@ -27,6 +29,8 @@ void warning_msg(const char *fmt, ...)
  */
 void error_exit(const char *fmt, ...)
 {
+    endwin();
+
     va_list arguments;
     va_start(arguments, fmt);
 
@@ -34,5 +38,5 @@ void error_exit(const char *fmt, ...)
     vfprintf(stderr, fmt, arguments);
 
     va_end(arguments);
-    exit(EXIT_FAILURE);
+    std::exit(EXIT_FAILURE);
 }

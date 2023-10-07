@@ -11,6 +11,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstdarg>
+#include <ncurses.h>
 
 /**
  * @brief Vypíše text "CHYBA:..."
