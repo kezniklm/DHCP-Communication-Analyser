@@ -95,7 +95,14 @@ int main(int argc, char *argv[])
     std::string filter = DHCP_SETTINGS;
     bpf_u_int32 pMask, pNet;
 
-    if (arguments.is_interface)
+    if (arguments.is_help)
+    {
+        delwin(prefix_window);
+        endwin();
+        printf("Názov:\n    dhcp-stats - analyzátor percentuálneho využitia sieťových prefixov\n\nPoužitie:\n  ./dhcp-stats [-r <filename>] [-i <interface-name>]  [--ext] <ip-prefix> [ <ip-prefix> [ ... ] ]\n\n  ./dhcp-stats --help \n\n  ./dhcp-stats -h \nPopis:\n    Sieťový analyzátor, ktorý umožňuje získanie percentuálneho využitia sieťových prefixov\n");
+        std::exit(EXIT_SUCCESS);
+    }
+    else if (arguments.is_interface)
     {
         if (pcap_lookupnet(arguments.get_interface().c_str(), &pNet, &pMask, errbuff) == ERROR)
         {
@@ -116,6 +123,7 @@ int main(int argc, char *argv[])
     {
         opened_session = arguments.get_file();
     }
+
     if (pcap_compile(opened_session, &fp, filter.c_str(), 0, pNet) == ERROR)
     {
         error_exit("Zlyhanie funkcie pcap_compile");

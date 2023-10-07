@@ -101,6 +101,8 @@ public:
 
     bool is_interface;
 
+    bool is_help;
+
     bool extensions;
 
 private:
