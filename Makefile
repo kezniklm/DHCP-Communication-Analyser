@@ -7,6 +7,7 @@
 
 CC = g++
 CFLAGS = -std=c++20 -pedantic -Wextra -Werror -g -fcommon -lpcap 
+LOGIN = xkezni01
 
 .PHONY: error.o Arguments.o dhcp-stats.o dhcp-stats zip clean
 
@@ -37,11 +38,16 @@ Utils.o: Utils.hpp Utils.cpp
 dhcp-stats.o: dhcp-stats.hpp dhcp-stats.cpp
 	$(CC) $(CFLAGS) -c dhcp-stats.cpp -o dhcp-stats.o
 
-zip:
-	zip -r xkezni01 * .gitignore
+remake: clean dhcp-stats
+
+manpage:
+	man -l dhcp-stats.1
+
+pack: clean
+	tar -cf $(LOGIN).tar *
 	
 clean:
 	rm -f dhcp-stats
-	rm -f xkezni01.zip
+	rm -f xkezni01.tar
 	rm -f *.o 
 	
