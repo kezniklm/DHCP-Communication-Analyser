@@ -44,7 +44,7 @@ manpage:
 	man -l dhcp-stats.1
 
 pack: clean
-	tar -cf $(LOGIN).tar *
+	tar --exclude-vcs -cf $(LOGIN).tar *
 	
 clean:
 	rm -f dhcp-stats
