@@ -27,11 +27,44 @@ std::string DHCP::extract_yiaddr(const struct pcap_pkthdr *header, const u_char 
     return inet_ntoa(assigned_ip);
 }
 
+/**
+ * @brief Extrahuje ciaddr IP adresu z DHCP paketu
+ * @param header Hlavička pcap
+ * @param packet Paket
+ * @return
+ */
 std::string DHCP::extract_ciaddr(const pcap_pkthdr *header, const u_char *packet)
 {
     DHCP::packet *dhcp_header = (DHCP::packet *)(packet + sizeof(struct ether_header) + sizeof(struct ip) + sizeof(struct udphdr));
     struct in_addr assigned_ip = dhcp_header->ciaddr;
     return inet_ntoa(assigned_ip);
+}
+
+/**
+ * @brief Vráti destination IP z paketu
+ * @param header Hlavička pcap
+ * @param packet Paket
+ * @return
+ */
+std::string DHCP::get_dest_IP(const pcap_pkthdr *header, const u_char *packet)
+{
+    struct ip *ip_header = (struct ip *)(packet + sizeof(struct ether_header));
+    char dest_ip[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &(ip_header->ip_dst), dest_ip, INET_ADDRSTRLEN);
+    return dest_ip;
+}
+
+/**
+ * @brief Extrahuje chaddr - MAC adresu z DHCP paketu
+ * @param header Hlavička pcap
+ * @param packet Paket
+ * @return
+ */
+std::string DHCP::extract_chaddr(const pcap_pkthdr *header, const u_char *packet)
+{
+    DHCP::packet *dhcp_header = (DHCP::packet *)(packet + sizeof(struct ether_header) + sizeof(struct ip) + sizeof(struct udphdr));
+    std::string MAC_address = format_MAC_stringstream(dhcp_header->chaddr);
+    return MAC_address;
 }
 
 /**
@@ -86,25 +119,43 @@ bool DHCP::verify_dhcp_negotiation(const pcap_pkthdr *header, const u_char *buff
     {
         Negotiator negotiator(header, buffer);
         this->clients_without_ip.push_back(negotiator);
-        this->is_DORA_continuous(get_receiver_mac_address(header, buffer), this->Discover);
+        this->is_DORA_continuous(get_sender_mac_address(header, buffer), this->Discover);
     }
     else if (this->is_message_of_type(header, buffer, this->Offer))
     {
-        this->search_MAC_and_modify_flag(get_receiver_mac_address(header, buffer), this->Offer);
-        this->is_DORA_continuous(get_receiver_mac_address(header, buffer), this->Offer);
+        std::string MAC_address = get_receiver_mac_address(header, buffer);
+        if (MAC_address == BROADCAST_MAC)
+        {
+            MAC_address = extract_chaddr(header, buffer);
+        }
+        this->search_MAC_and_modify_flag(MAC_address, this->Offer);
+        this->is_DORA_continuous(MAC_address, this->Offer);
     }
     else if (this->is_message_of_type(header, buffer, this->Request))
     {
+        if (!this->is_in_clients_without_ip(get_sender_mac_address(header, buffer)))
+        {
+            Negotiator negotiator(header, buffer);
+            negotiator.has_discover = true;
+            negotiator.has_offer = true;
+            this->clients_without_ip.push_back(negotiator);
+        }
         this->search_MAC_and_modify_flag(get_sender_mac_address(header, buffer), this->Request);
         this->add_requested_ip(header, buffer);
-        this->is_DORA_continuous(get_receiver_mac_address(header, buffer), this->Request);
+        this->is_DORA_continuous(get_sender_mac_address(header, buffer), this->Request);
     }
     else if (this->is_message_of_type(header, buffer, this->Acknowledgment))
     {
-        this->search_MAC_and_modify_flag(get_receiver_mac_address(header, buffer), this->Acknowledgment);
-        this->is_DORA_continuous(get_receiver_mac_address(header, buffer), this->Acknowledgment);
-        return this->is_negotiation_complete(get_receiver_mac_address(header, buffer));
+        std::string MAC_address = get_receiver_mac_address(header, buffer);
+        if (MAC_address == BROADCAST_MAC)
+        {
+            MAC_address = extract_chaddr(header, buffer);
+        }
+        this->search_MAC_and_modify_flag(MAC_address, this->Acknowledgment);
+        this->is_DORA_continuous(MAC_address, this->Acknowledgment);
+        return this->is_negotiation_complete(MAC_address);
     }
+
     return false;
 }
 
@@ -171,6 +222,23 @@ bool DHCP::check_MAC_IP_pair(std::string IP_address, std::string MAC_address)
 }
 
 /**
+ * @brief Vyhľadá clienta podľa MAC adresy vo vektori clients_without_ip
+ * @param MAC_address
+ * @return
+ */
+bool DHCP::is_in_clients_without_ip(std::string MAC_address)
+{
+    for (long unsigned int i = 0; i < this->clients_without_ip.size(); i++)
+    {
+        if (MAC_to_uppercase(this->clients_without_ip[i].get_MAC_address()) == MAC_to_uppercase(MAC_address))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
  * @brief Skontroluje, či DORA proces prebehol úspešne
  * @param MAC MAC adresa zariadenia
  * @return
@@ -212,20 +280,22 @@ void DHCP::add_requested_ip(const pcap_pkthdr *header, const u_char *buffer)
         int option_code = options[i];
         if (option_code == 50)
         {
-            in_addr ip_addr;
-            memcpy(&ip_addr, options + i + 2, sizeof(ip_addr));
-            char ip_str[INET_ADDRSTRLEN];
-            inet_ntop(AF_INET, &ip_addr, ip_str, sizeof(ip_str));
-
-            for (long unsigned int i = 0; i < this->clients_without_ip.size(); i++)
+            if (options[i + 1] == 4)
             {
-                if (this->clients_without_ip[i].get_MAC_address() == get_sender_mac_address(header, buffer))
+                in_addr ip_addr;
+                memcpy(&ip_addr, options + i + 2, sizeof(ip_addr));
+                char ip_str[INET_ADDRSTRLEN];
+                inet_ntop(AF_INET, &ip_addr, ip_str, sizeof(ip_str));
+                for (long unsigned int i = 0; i < this->clients_without_ip.size(); i++)
                 {
-                    this->clients_without_ip[i].set_IP_address(ip_str);
+                    if (this->clients_without_ip[i].get_MAC_address() == get_sender_mac_address(header, buffer))
+                    {
+                        this->clients_without_ip[i].set_IP_address(ip_str);
+                    }
                 }
-            }
 
-            return;
+                return;
+            }
         }
     }
 }

@@ -37,6 +37,7 @@ void signal_handler(int signum)
         pcap_close(to_release->opened_session);
     }
 
+    closelog();
     endwin();
     exit(SIGINT);
 }
@@ -56,6 +57,16 @@ void packet_handler(u_char *args, const struct pcap_pkthdr *header, const u_char
     {
         std::string IP_address = dhcp.extract_yiaddr(header, buffer);
         std::string MAC_address = get_receiver_mac_address(header, buffer);
+        if (MAC_address == BROADCAST_MAC)
+        {
+            MAC_address = dhcp.extract_chaddr(header, buffer);
+        }
+
+        if (IP_address == "0.0.0.0")
+        {
+            IP_address = dhcp.get_dest_IP(header, buffer);
+        }
+
         if (dhcp.check_MAC_IP_pair(IP_address, MAC_address))
         {
             arguments->add_client_to_prefix_vector(IP_address, MAC_address);
@@ -146,6 +157,7 @@ int main(int argc, char *argv[])
         filter.~basic_string();
     }
 
+    // Nekonečný cyklus - aby nebolo okno NCurses ukončené hneď po spracovaní súboru
     while (true)
     {
         pcap_loop(opened_session, 0, packet_handler, (u_char *)&arguments);

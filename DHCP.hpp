@@ -56,6 +56,22 @@ public:
     std::string extract_ciaddr(const pcap_pkthdr *header, const u_char *packet);
 
     /**
+     * @brief Extrahuje chaddr - MAC adresu z DHCP paketu
+     * @param header Hlavička pcap
+     * @param packet Paket
+     * @return
+     */
+    std::string extract_chaddr(const pcap_pkthdr *header, const u_char *packet);
+
+    /**
+     * @brief Vráti destination IP z paketu
+     * @param header Hlavička pcap
+     * @param packet Paket
+     * @return
+     */
+    std::string get_dest_IP(const pcap_pkthdr *header, const u_char *packet);
+
+    /**
      * @brief Overí, či je správa typu type
      * @param header Hlavička pcap
      * @param buffer Paket
@@ -94,6 +110,13 @@ public:
      * @return
      */
     bool check_MAC_IP_pair(std::string IP_address, std::string MAC_address);
+
+    /**
+     * @brief Vyhľadá clienta podľa MAC adresy vo vektori clients_without_ip
+     * @param MAC_address
+     * @return
+     */
+    bool is_in_clients_without_ip(std::string MAC_address);
 
     /**
      * @brief Skontroluje, či DORA proces prebehol úspešne

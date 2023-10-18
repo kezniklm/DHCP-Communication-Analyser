@@ -14,6 +14,7 @@
 Negotiator::Negotiator(const pcap_pkthdr *header, const u_char *buffer)
 {
     this->MAC_adress = get_sender_mac_address(header, buffer);
+    this->has_discover = true;
     if (get_receiver_mac_address(header, buffer) != BROADCAST_MAC)
     {
         error_exit("Nekorektný DHCP Discover paket\n");
