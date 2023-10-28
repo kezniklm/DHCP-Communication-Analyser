@@ -84,6 +84,7 @@ void IP_prefix::has_50_percent()
     if (this->get_usage() > 50.00)
     {
         syslog(LOG_WARNING, "prefix %s exceeded 50%% of allocations.", this->get_prefix().c_str());
+        std::cout << "prefix " << this->get_prefix() << " exceeded 50% of allocations." << std::endl;
     }
 }
 
