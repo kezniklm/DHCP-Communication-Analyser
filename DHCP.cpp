@@ -80,10 +80,16 @@ bool DHCP::is_message_of_type(const struct pcap_pkthdr *header, const u_char *bu
     u_char *options = (u_char *)dhcp_header + 240;
     int option_len = header->caplen - 240;
 
-    for (int i = 0; i < option_len;)
+    for (int i = 0; i < option_len - 2;)
     {
         int option_code = options[i++];
         int option_length = options[i++];
+
+        if (i + option_length > option_len)
+        {
+            return false;
+        }
+
         if (option_code == 53 && option_length == 1)
         {
             int dhcp_msg_type = options[i++];

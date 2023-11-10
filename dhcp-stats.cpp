@@ -157,19 +157,10 @@ int main(int argc, char *argv[])
         filter.~basic_string();
     }
 
+    pcap_loop(opened_session, 0, packet_handler, (u_char *)&arguments);
+
     // Nekonečný cyklus - aby nebolo okno NCurses ukončené hneď po spracovaní súboru
     while (true)
     {
-        pcap_loop(opened_session, 0, packet_handler, (u_char *)&arguments);
     }
-
-    pcap_freecode(&fp);
-    pcap_close(opened_session);
-
-    closelog();
-
-    delwin(prefix_window);
-    endwin();
-
-    exit(EXIT_SUCCESS);
 }
