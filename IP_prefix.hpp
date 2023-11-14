@@ -18,8 +18,8 @@
 #include "Clients.hpp"
 #include "Utils.hpp"
 
-#define NETWORK_ADRESS 1
-#define BROADCAST_ADRESS 1
+#define NETWORK_ADDRESS 1
+#define BROADCAST_ADDRESS 1
 
 /**
  * @brief Trieda obsahujúca informácie o IP prefixe a metódy s ním spojené
@@ -143,9 +143,9 @@ public:
 private:
     std::string prefix;
 
-    int maximum;
+    unsigned long maximum;
 
-    int used;
+    unsigned long used;
 
     double usage;
 
@@ -159,5 +159,5 @@ private:
      * @param prefix Prefix s overenou správnosťou
      * @return Maximálne počet použiteľných IP adries v rámci prefixu
      */
-    int calculate_maximum_usage(std::string prefix);
+    unsigned long calculate_maximum_usage(std::string prefix);
 };

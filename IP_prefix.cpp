@@ -241,7 +241,7 @@ bool IP_prefix::is_IP_in_vector(std::string IP_address)
  * @param prefix Prefix s overenou správnosťou
  * @return Maximálne počet použiteľných IP adries v rámci prefixu
  */
-int IP_prefix::calculate_maximum_usage(std::string prefix)
+unsigned long IP_prefix::calculate_maximum_usage(std::string prefix)
 {
     std::string ipAddress = prefix.substr(0, prefix.find('/'));
     int prefixLength;
@@ -258,15 +258,15 @@ int IP_prefix::calculate_maximum_usage(std::string prefix)
     }
 
     // Výpočet dostupných adries
-    int availableAddresses = 1 << (32 - prefixLength);
-    if ((availableAddresses - NETWORK_ADRESS - BROADCAST_ADRESS) == 0)
+    unsigned long availableAddresses = static_cast<unsigned long long>(1) << (32 - prefixLength);
+    if (availableAddresses <= NETWORK_ADDRESS + BROADCAST_ADDRESS)
     {
         warning_msg("Prefix nemá voľné žiadne adresy!");
         return 0;
     }
     else
     {
-        return (availableAddresses - NETWORK_ADRESS - BROADCAST_ADRESS);
+        return (availableAddresses - NETWORK_ADDRESS - BROADCAST_ADDRESS);
     }
 }
 
@@ -278,8 +278,8 @@ int IP_prefix::calculate_maximum_usage(std::string prefix)
 void IP_prefix::write_prefix(WINDOW *prefix_window, int number_of_prefix)
 {
     mvwprintw(prefix_window, number_of_prefix, 1, "%s", this->prefix.c_str());
-    mvwprintw(prefix_window, number_of_prefix, 20, "%d", this->maximum);
-    mvwprintw(prefix_window, number_of_prefix, 40, "%d", this->used);
+    mvwprintw(prefix_window, number_of_prefix, 20, "%lu", this->maximum);
+    mvwprintw(prefix_window, number_of_prefix, 40, "%lu", this->used);
     mvwprintw(prefix_window, number_of_prefix, 60, "%.2f%%", this->usage);
     wnoutrefresh(prefix_window);
     doupdate();
