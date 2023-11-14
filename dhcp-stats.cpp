@@ -62,7 +62,7 @@ void packet_handler(u_char *args, const struct pcap_pkthdr *header, const u_char
             MAC_address = dhcp.extract_chaddr(header, buffer);
         }
 
-        if (IP_address == "0.0.0.0")
+        if (IP_address == UNDEFINED_IP)
         {
             IP_address = dhcp.get_dest_IP(header, buffer);
         }

@@ -14,6 +14,7 @@
 
 #define ERROR -1
 #define DHCP_SETTINGS "(udp port 67 or udp port 68) and ip"
+#define UNDEFINED_IP "0.0.0.0"
 
 /**
  * @brief Štruktúra obsahujúca ukazatele na objekty, ktoré musia byť uvoľnené
