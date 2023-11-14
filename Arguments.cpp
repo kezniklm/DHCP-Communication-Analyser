@@ -234,33 +234,59 @@ void Arguments::check_mask(std::string mask)
 }
 
 /**
+ * @brief Skontroluje, či IP adresa patrí do prefixu
+ * @param prefix Prefix
+ * @param IP_address IP adresa
+ * @return
+ */
+bool Arguments::is_client_in_prefix(IP_prefix &prefix, const std::string &IP_address)
+{
+    return (prefix.get_prefix() == ALL_HOSTS_PREFIX ||
+            (prefix.match_prefix(IP_address) && !prefix.is_IP_in_vector(IP_address)) &&
+                !prefix.is_network_broadcast_address(IP_address));
+}
+
+/**
+ * @brief Aktualizuje informácie o prefixe
+ * @param prefix Prefix
+ * @param operation Operácia - INCREMENT alebo DECREMENT
+ */
+void Arguments::update_prefix_info(IP_prefix &prefix, bool operation)
+{
+    if (prefix.get_maximum() == 0)
+    {
+        return;
+    }
+    if (operation == INCREMENT)
+    {
+        prefix.set_used(prefix.get_used() + 1);
+    }
+    else
+    {
+        prefix.set_used(prefix.get_used() - 1);
+    }
+    prefix.calculate_usage();
+    prefix.has_50_percent();
+}
+
+/**
  * @brief Pridá klienta do vectoru prefixov
  * @param IP_address IP adresa klienta
  * @param MAC_address MAC adresa klienta
  */
 void Arguments::add_client_to_prefix_vector(std::string IP_address, std::string MAC_address)
 {
-    for (IP_prefix prefix_interator : this->IP_prefixes)
+    size_t position = 0;
+    for (IP_prefix &prefix : this->IP_prefixes)
     {
-        if (prefix_interator.match_prefix(IP_address) && !prefix_interator.is_IP_in_vector(IP_address))
+        if (is_client_in_prefix(prefix, IP_address))
         {
-            for (size_t i = 0; i < this->IP_prefixes.size(); ++i)
-            {
-                if (this->IP_prefixes[i].get_prefix() == prefix_interator.get_prefix() && !prefix_interator.is_network_broadcast_address(IP_address))
-                {
-                    this->IP_prefixes[i].add_IP_to_vector(IP_address, MAC_address);
-                    if (this->IP_prefixes[i].get_maximum() == 0)
-                    {
-                        return;
-                    }
-                    int old_used = this->IP_prefixes[i].get_used();
-                    this->IP_prefixes[i].set_used(++old_used);
-                    this->IP_prefixes[i].calculate_usage();
-                    this->IP_prefixes[i].has_50_percent();
-                    this->IP_prefixes[i].write_prefix(this->prefix_window, i + 1);
-                }
-            }
+            IP_prefix &current_prefix = this->IP_prefixes[position];
+            current_prefix.add_IP_to_vector(IP_address, MAC_address);
+            update_prefix_info(current_prefix, INCREMENT);
+            current_prefix.write_prefix(this->prefix_window, position + 1);
         }
+        ++position;
     }
 }
 
@@ -271,27 +297,17 @@ void Arguments::add_client_to_prefix_vector(std::string IP_address, std::string 
  */
 void Arguments::release(std::string IP_address, std::string MAC_address)
 {
-    for (IP_prefix prefix_interator : this->IP_prefixes)
+    size_t position = 0;
+    for (IP_prefix &prefix : this->IP_prefixes)
     {
-        if (prefix_interator.match_prefix(IP_address) && prefix_interator.is_IP_in_vector(IP_address))
+        if (is_client_in_prefix(prefix, IP_address))
         {
-            for (size_t i = 0; i < this->IP_prefixes.size(); ++i)
-            {
-                if (this->IP_prefixes[i].get_prefix() == prefix_interator.get_prefix() && !prefix_interator.is_network_broadcast_address(IP_address))
-                {
-                    if (this->IP_prefixes[i].get_maximum() == 0)
-                    {
-                        return;
-                    }
-                    this->IP_prefixes[i].delete_from_vector(IP_address, MAC_address);
-
-                    int old_used = this->IP_prefixes[i].get_used();
-                    this->IP_prefixes[i].set_used(--old_used);
-                    this->IP_prefixes[i].calculate_usage();
-                    this->IP_prefixes[i].write_prefix(this->prefix_window, i + 1);
-                }
-            }
+            IP_prefix &current_prefix = this->IP_prefixes[position];
+            current_prefix.delete_from_vector(IP_address, MAC_address);
+            update_prefix_info(current_prefix, DECREMENT);
+            current_prefix.write_prefix(this->prefix_window, position + 1);
         }
+        ++position;
     }
 }
 

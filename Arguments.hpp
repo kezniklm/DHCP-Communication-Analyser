@@ -17,6 +17,9 @@
 #define NEXT_ARGUMENT 1
 #define IP_LENGTH 15
 #define IP_OCTETS 4
+#define ALL_HOSTS_PREFIX "0.0.0.0/0"
+#define INCREMENT true
+#define DECREMENT false
 
 /**
  * @brief Trieda, ktorej úlohou je spracovanie argumentov
@@ -154,6 +157,21 @@ private:
      * @param mask Maska na skontrolovanie
      */
     void check_mask(std::string mask);
+
+    /**
+     * @brief Skontroluje, či IP adresa patrí do prefixu
+     * @param prefix Prefix
+     * @param IP_address IP adresa
+     * @return
+     */
+    bool is_client_in_prefix(IP_prefix &prefix, const std::string &IP_address);
+
+    /**
+     * @brief Aktualizuje informácie o prefixe
+     * @param prefix Prefix
+     * @param operation Operácia - INCREMENT alebo DECREMENT
+     */
+    void update_prefix_info(IP_prefix &prefix, bool operation);
 
     /**
      * @brief Kontroluje, či je číslo v zadanom intervale
