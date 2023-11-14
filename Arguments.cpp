@@ -251,7 +251,7 @@ bool Arguments::is_client_in_prefix(IP_prefix &prefix, const std::string &IP_add
  * @param prefix Prefix
  * @param operation Operácia - INCREMENT alebo DECREMENT
  */
-void Arguments::update_prefix_info(IP_prefix &prefix, bool operation)
+void Arguments::update_prefix_info(IP_prefix &prefix, bool operation, int number_of_prefix)
 {
     if (prefix.get_maximum() == 0)
     {
@@ -266,7 +266,7 @@ void Arguments::update_prefix_info(IP_prefix &prefix, bool operation)
         prefix.set_used(prefix.get_used() - 1);
     }
     prefix.calculate_usage();
-    prefix.has_50_percent();
+    prefix.has_50_percent(this->get_prefix_window(), number_of_prefix);
 }
 
 /**
@@ -283,7 +283,7 @@ void Arguments::add_client_to_prefix_vector(std::string IP_address, std::string 
         {
             IP_prefix &current_prefix = this->IP_prefixes[position];
             current_prefix.add_IP_to_vector(IP_address, MAC_address);
-            update_prefix_info(current_prefix, INCREMENT);
+            update_prefix_info(current_prefix, INCREMENT, position + 1);
             current_prefix.write_prefix(this->prefix_window, position + 1);
         }
         ++position;
@@ -304,7 +304,7 @@ void Arguments::release(std::string IP_address, std::string MAC_address)
         {
             IP_prefix &current_prefix = this->IP_prefixes[position];
             current_prefix.delete_from_vector(IP_address, MAC_address);
-            update_prefix_info(current_prefix, DECREMENT);
+            update_prefix_info(current_prefix, DECREMENT, position);
             current_prefix.write_prefix(this->prefix_window, position + 1);
         }
         ++position;

@@ -171,7 +171,7 @@ private:
      * @param prefix Prefix
      * @param operation Operácia - INCREMENT alebo DECREMENT
      */
-    void update_prefix_info(IP_prefix &prefix, bool operation);
+    void update_prefix_info(IP_prefix &prefix, bool operation, int number_of_prefix);
 
     /**
      * @brief Kontroluje, či je číslo v zadanom intervale

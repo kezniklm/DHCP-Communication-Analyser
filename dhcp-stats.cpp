@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     noecho();                                      // Vypnutie zobrazovania znakov na obrazovke
     curs_set(FALSE);                               // Skrytie kurzora
     keypad(stdscr, TRUE);                          // Povolenie šípiek
-    WINDOW *prefix_window = newwin(10, 120, 0, 0); // Vytvorenie okna
+    WINDOW *prefix_window = newwin(10, 160, 0, 0); // Vytvorenie okna
     mvwprintw(prefix_window, 0, 1, "IP-Prefix");
     mvwprintw(prefix_window, 0, 20, "Max-hosts");
     mvwprintw(prefix_window, 0, 40, "Allocated addresses");

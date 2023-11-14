@@ -79,12 +79,15 @@ void IP_prefix::delete_from_vector(std::string IP_address, std::string MAC_addre
 /**
  * @brief V prípade, že počet alokovaných adries v prefixe prekročí 50%, zaloguje túto informáciu cez standardní syslog mechanismus do logu
  */
-void IP_prefix::has_50_percent()
+void IP_prefix::has_50_percent(WINDOW *window, int number_of_prefix)
 {
     if (this->get_usage() > 50.00)
     {
         syslog(LOG_WARNING, "prefix %s exceeded 50%% of allocations.", this->get_prefix().c_str());
-        std::cout << "prefix " << this->get_prefix() << " exceeded 50% of allocations." << std::endl;
+        std::cout << "\n               prefix " << this->get_prefix() << " exceeded 50% of allocations." << std::endl; // Na Ubuntu funguje, na Merlinovi nie je vidno - z toho dôvodu sa to prekrýva - splnené zadanie a aj prenositeľné
+        mvwprintw(window, number_of_prefix, 80, "prefix %s exceeded 50%% of allocations.", this->get_prefix().c_str());
+        wnoutrefresh(window);
+        doupdate();
     }
 }
 
