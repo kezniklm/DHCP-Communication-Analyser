@@ -15,7 +15,7 @@ Aplikácia podporuje nasledujúce funkcie:
 - Analýzu pcap súborov obsahujúcich DHCP prevádzku.
 - Sledovanie viacerých sieťových prefixov, vrátane prekryvajúcich sa prefixov.
 - Výpočet vyťaženia sieťových prefixov na základe alokovaných adries.
-- V prípade vyťaženia sieťového prefixu nad 50% alokovaných adries zápis záznamu do syslogu.
+- V prípade vyťaženia sieťového prefixu nad 50% alokovaných adries zápis záznamu do syslogu a na štandardný výstup.
 
 ### Rozšírenia
 - Podpora uvoľňovania adries správou od klienta - DHCPRELEASE
@@ -37,14 +37,20 @@ Sieťová aplikácia dhcp-stats je implementovaná v jazyku C++, revízia C++20 
 ## Zoznam súborov
 - Arguments.cpp
 - Arguments.hpp
+- Clients.cpp
+- Clients.hpp
 - dhcp-stats.cpp
 - dhcp-stats.hpp
 - DHCP.cpp
 - DHCP.hpp
-- error.cpp
-- error.hpp
+- Error.cpp
+- Error.hpp
 - IP_prefix.cpp
 - IP_prefix.hpp
+- Negotiator.cpp
+- Negotiator.hpp
+- Utils.cpp
+- Utils.hpp
 - Makefile
 - test.py
 - manual.pdf
