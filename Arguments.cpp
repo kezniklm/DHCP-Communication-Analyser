@@ -198,6 +198,11 @@ void Arguments::check_ip_format(std::string ip_address)
         }
         check_scope(octet, &octet_number);
     }
+
+    if (octet_number != IP_OCTETS)
+    {
+        error_exit("IP adresa nemá požadovaný formát\n");
+    }
 }
 
 /**
