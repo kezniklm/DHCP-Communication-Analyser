@@ -77,17 +77,21 @@ void IP_prefix::delete_from_vector(std::string IP_address, std::string MAC_addre
 }
 
 /**
- * @brief V prípade, že počet alokovaných adries v prefixe prekročí 50%, zaloguje túto informáciu cez standardní syslog mechanismus do logu
+ * @brief V prípade, že počet alokovaných adries v prefixe prekročí 50% alebo viac, zaloguje túto informáciu cez standardní syslog mechanismus do logu
  */
-void IP_prefix::has_50_percent(WINDOW *window, int number_of_prefix)
+void IP_prefix::has_50_or_more_percent(WINDOW *window, int number_of_prefix)
 {
-    if (this->get_usage() > 50.00)
+    for (double percent = 90.00; percent >= 50.00; percent -= 10.00)
     {
-        syslog(LOG_WARNING, "prefix %s exceeded 50%% of allocations.", this->get_prefix().c_str());
-        std::cout << "\n               prefix " << this->get_prefix() << " exceeded 50% of allocations." << std::endl; // Na Ubuntu funguje, na Merlinovi nie je vidno - z toho dôvodu sa to prekrýva - splnené zadanie a aj prenositeľné
-        mvwprintw(window, number_of_prefix, 80, "prefix %s exceeded 50%% of allocations.", this->get_prefix().c_str());
-        wnoutrefresh(window);
-        doupdate();
+        if (this->get_usage() >= percent)
+        {
+            syslog(LOG_WARNING, "prefix %s exceeded %.0f%% of allocations.", this->get_prefix().c_str(), percent);
+            std::cout << "\n               prefix " << this->get_prefix() << " exceeded " << percent << "% of allocations." << std::endl;
+            mvwprintw(window, number_of_prefix, 80, "prefix %s exceeded %.0f%% of allocations.", this->get_prefix().c_str(), percent);
+            wnoutrefresh(window);
+            doupdate();
+            return;
+        }
     }
 }
 
@@ -264,7 +268,7 @@ unsigned long IP_prefix::calculate_maximum_usage(std::string prefix)
     unsigned long availableAddresses = static_cast<unsigned long long>(1) << (32 - prefixLength);
     if (availableAddresses <= NETWORK_ADDRESS + BROADCAST_ADDRESS)
     {
-        warning_msg("Prefix nemá voľné žiadne adresy!");
+        warning_msg("Prefix %s nemá voľné žiadne adresy!\n", prefix.c_str());
         return 0;
     }
     else

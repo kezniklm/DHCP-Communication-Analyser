@@ -138,7 +138,7 @@ public:
     /**
      * @brief V prípade, že počet alokovaných adries v prefixe prekročí 50%, zaloguje túto informáciu cez standardní syslog mechanismus do logu
      */
-    void has_50_percent(WINDOW *window, int number_of_prefix);
+    void has_50_or_more_percent(WINDOW *window, int number_of_prefix);
 
 private:
     std::string prefix;

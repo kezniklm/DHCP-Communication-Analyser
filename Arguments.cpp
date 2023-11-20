@@ -271,7 +271,7 @@ void Arguments::update_prefix_info(IP_prefix &prefix, bool operation, int number
         prefix.set_used(prefix.get_used() - 1);
     }
     prefix.calculate_usage();
-    prefix.has_50_percent(this->get_prefix_window(), number_of_prefix);
+    prefix.has_50_or_more_percent(this->get_prefix_window(), number_of_prefix);
 }
 
 /**
