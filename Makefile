@@ -50,4 +50,5 @@ clean:
 	rm -f dhcp-stats
 	rm -f xkezni01.tar
 	rm -f *.o 
+	rm -f valgrind
 	
