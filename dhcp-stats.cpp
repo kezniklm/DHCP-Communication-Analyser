@@ -37,6 +37,7 @@ void signal_handler(int signum)
         pcap_close(to_release->opened_session);
     }
 
+    delete to_release;
     closelog();
     endwin();
     exit(SIGINT);
@@ -145,8 +146,7 @@ int main(int argc, char *argv[])
         error_exit("Nie je možné použiť daný filter");
     }
 
-    struct to_release release;
-    to_release = &release;
+    to_release = new struct to_release;
     to_release->arguments = &arguments;
     to_release->opened_session = opened_session;
     to_release->bpf = &fp;
